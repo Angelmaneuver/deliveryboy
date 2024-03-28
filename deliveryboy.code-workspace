@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"name": "Delivery Boy",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.insertFinalNewline": true,
+		"files.trimFinalNewlines": true,
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-azuretools.vscode-docker",
+			"ms-vscode-remote.remote-containers",
+		]
+	}
+}

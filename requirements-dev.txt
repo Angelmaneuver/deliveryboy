@@ -1,0 +1,6 @@
+black
+click
+mypy-extensions
+packaging
+pathspec
+platformdirs

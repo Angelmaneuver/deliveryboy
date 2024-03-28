@@ -1,0 +1,6 @@
+fire==0.6.0
+setuptools
+six==1.16.0
+termcolor==2.4.0
+watchdog==4.0.0
+wheel
