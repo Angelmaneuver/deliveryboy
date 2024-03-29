@@ -42,13 +42,13 @@ class TerminalEventHandler(AbstractEventHandler):
 
             path = Path(self._base) / Path(origin["paths"])
 
-            if self.isRemain(path):
+            if self.isRemain(origin, path):
                 return
 
             path.rmdir()
 
             for i in range(1, origin["paths"].count(os.sep) + 1):
-                if self.isRemain(path.parents[i]):
+                if self.isRemain(origin, path.parents[i]):
                     return
 
                 path.parents[i].rmdir()
