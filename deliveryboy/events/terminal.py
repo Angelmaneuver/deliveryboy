@@ -75,7 +75,7 @@ class TerminalEventHandler(AbstractEventHandler):
             return True
 
         exisiting = next(
-            filter(lambda value: not value.startsWith("."), list(path.iterdir())),
+            filter(lambda value: not str(value).startsWith("."), list(path.iterdir())),
             None,
         )
 
