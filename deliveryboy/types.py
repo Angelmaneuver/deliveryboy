@@ -1,3 +1,4 @@
+from threading import Lock
 from typing import TypedDict
 
 
@@ -11,3 +12,8 @@ class Origin(TypedDict):
 class Entry(TypedDict):
     id: str
     origin: Origin
+
+
+class Data(TypedDict):
+    data: list[Entry]
+    lock: Lock

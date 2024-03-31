@@ -1,25 +1,30 @@
 import os
-import shutil
-from threading import Lock
+from pathlib import Path
 from uuid import uuid4 as uuid
 
 from watchdog.events import FileSystemEvent
 
-from deliveryboy.types import Entry, Origin
+from deliveryboy.types import Data, Entry, Origin
 
 from .abc import AbstractEventHandler
 
 
 class APEventHandler(AbstractEventHandler):
+    def __init__(self, base: str, queue: Data) -> None:
+        super().__init__(base)
+
+        self._queue = queue["data"]
+        self._lock = queue["lock"]
+
     def on_created(self, event: FileSystemEvent) -> None:
         if event.is_directory:
             return
 
         id = str(uuid())
-        src = event.src_path
-        dirname = os.path.dirname(src)
-        basename = os.path.splitext(os.path.basename(src))[0]
-        _, extension = os.path.splitext(src)
+        src = Path(event.src_path)
+        dirname = str(src.parent)
+        basename = src.stem
+        extension = "".join(src.suffixes)
 
         replace = self._base
         if dirname.startswith(f"{replace}{os.sep}"):
@@ -27,19 +32,15 @@ class APEventHandler(AbstractEventHandler):
 
         paths = dirname.replace(replace, "", 1)
 
-        dest = os.path.join(self._dest, id)
-
         with self._lock:
-            self._entry.append(
+            self._queue.append(
                 Entry(
                     id=id,
                     origin=Origin(
-                        full=src,
+                        full=str(src),
                         paths=paths,
                         basename=basename,
                         extension=extension,
                     ),
                 )
             )
-
-            shutil.move(src, dest)

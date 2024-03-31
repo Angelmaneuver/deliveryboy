@@ -3,39 +3,54 @@ import threading
 
 from . import watcher
 from .events import APEventHandler, TerminalEventHandler
-from .types import Entry
+from .types import Data
 
 
-def start(request: str, destination: str, pickuppoint: str, response: str) -> None:
+def start(
+    request: str, destination: str, pickuppoint: str, response: str, max_queue_size=50
+) -> None:
     is_valid(request)
     is_valid(response)
     is_valid(destination)
     is_valid(pickuppoint)
 
-    entry: list[Entry] = []
-    lock = threading.Lock()
+    queue: Data = {"data": [], "lock": threading.Lock()}
+    entry: Data = {"data": [], "lock": threading.Lock()}
 
     threads = {
-        "ap": threading.Thread(
-            target=watcher.ap.regist,
-            args=(
-                request,
-                APEventHandler(request, destination, entry, lock),
+        "ap": {
+            "watch": threading.Thread(
+                target=watcher.ap.regist,
+                args=(
+                    request,
+                    APEventHandler(request, queue),
+                ),
             ),
-        ),
+            "move": threading.Thread(
+                target=watcher.ap.move,
+                args=(
+                    destination,
+                    queue,
+                    entry,
+                    max_queue_size,
+                ),
+            ),
+        },
         "terminal": threading.Thread(
             target=watcher.terminal.regist,
             args=(
                 pickuppoint,
-                TerminalEventHandler(request, response, entry, lock),
+                TerminalEventHandler(request, response, queue, entry),
             ),
         ),
     }
 
-    threads["ap"].start()
+    threads["ap"]["watch"].start()
+    threads["ap"]["move"].start()
     threads["terminal"].start()
 
-    threads["ap"].join()
+    threads["ap"]["watch"].join()
+    threads["ap"]["move"].join()
     threads["terminal"].join()
 
 

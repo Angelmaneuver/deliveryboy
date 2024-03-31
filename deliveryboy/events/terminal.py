@@ -4,18 +4,27 @@ from pathlib import Path
 
 from watchdog.events import FileSystemEvent
 
-from deliveryboy.types import Origin
+from deliveryboy.types import Data, Origin
 
 from .abc import AbstractEventHandler
 
 
 class TerminalEventHandler(AbstractEventHandler):
+    def __init__(self, base: str, dest: str, queue: Data, entry: Data) -> None:
+        self._base = Path(base)
+        self._dest = Path(dest)
+        self._queue = queue["data"]
+        self._lock4queue = queue["lock"]
+        self._entry = entry["data"]
+        self._lock4entry = entry["lock"]
+
     def on_created(self, event: FileSystemEvent) -> None:
         if event.is_directory:
             return
 
-        src = event.src_path
-        id, extension = os.path.splitext(os.path.basename(src))
+        src = Path(event.src_path)
+        id = src.stem
+        extension = "".join(src.suffixes)
 
         index, entry = next(
             filter(lambda registered: registered[1]["id"] == id, enumerate(self._entry))
@@ -25,22 +34,22 @@ class TerminalEventHandler(AbstractEventHandler):
 
         paths = self._dest
         if len(origin["paths"]) > 0:
-            paths = os.path.join(self._dest, origin["paths"])
-            os.makedirs(paths, exist_ok=True)
+            paths = self._dest.joinpath(origin["paths"])
+            paths.mkdir(exist_ok=True, parents=True)
 
         basename = f"{origin['basename']}{extension}"
 
-        dest = os.path.join(paths, basename)
+        dest = str(paths.joinpath(basename))
 
-        with self._lock:
+        with self._lock4entry:
             self._entry.pop(index)
 
-            shutil.move(src, dest)
+            shutil.move(str(src), dest)
 
             if len(origin["paths"]) == 0:
                 return
 
-            path = Path(self._base) / Path(origin["paths"])
+            path = self._base / Path(origin["paths"])
 
             if self.isRemain(origin, path):
                 return
@@ -73,5 +82,18 @@ class TerminalEventHandler(AbstractEventHandler):
         if exisiting is not None:
             return True
 
-        else:
-            return False
+        with self._lock4queue:
+            queueing = next(
+                filter(
+                    lambda queue: not queue["origin"]["paths"].startWith(
+                        origin["paths"]
+                    ),
+                    self._queue,
+                ),
+                None,
+            )
+
+            if queueing is not None:
+                return True
+
+        return False
