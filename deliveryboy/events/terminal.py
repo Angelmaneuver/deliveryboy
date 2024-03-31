@@ -65,7 +65,7 @@ class TerminalEventHandler(AbstractEventHandler):
     def isRemain(self, origin: Origin, path: Path) -> bool:
         entring = next(
             filter(
-                lambda entry: not entry["origin"]["paths"].startsWith(origin["paths"]),
+                lambda entry: not entry["origin"]["paths"].startswith(origin["paths"]),
                 self._entry,
             ),
             None,
@@ -75,7 +75,7 @@ class TerminalEventHandler(AbstractEventHandler):
             return True
 
         exisiting = next(
-            filter(lambda value: not str(value).startsWith("."), list(path.iterdir())),
+            filter(lambda value: not str(value).startswith("."), list(path.iterdir())),
             None,
         )
 
@@ -85,7 +85,7 @@ class TerminalEventHandler(AbstractEventHandler):
         with self._lock4queue:
             queueing = next(
                 filter(
-                    lambda queue: not queue["origin"]["paths"].startsWith(
+                    lambda queue: not queue["origin"]["paths"].startswith(
                         origin["paths"]
                     ),
                     self._queue,
