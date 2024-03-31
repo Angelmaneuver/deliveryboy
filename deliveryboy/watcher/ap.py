@@ -49,3 +49,5 @@ def move(
                 entry["data"].append(request)
 
                 shutil.move(request["origin"]["full"], path.joinpath(request["id"]))
+
+        time.sleep(wait)
