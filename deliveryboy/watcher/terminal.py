@@ -3,7 +3,7 @@ import time
 from watchdog.observers import Observer
 
 
-def regist(path: str, event_handler: any, wait=1):
+def regist(path: str, event_handler: any, wait: int = None):
     observer = Observer()
 
     observer.schedule(event_handler, path, recursive=True)
@@ -12,7 +12,8 @@ def regist(path: str, event_handler: any, wait=1):
 
     try:
         while True:
-            time.sleep(wait)
+            if wait is not None:
+                time.sleep(wait)
 
     except KeyboardInterrupt:
         observer.stop()
