@@ -100,7 +100,7 @@ def transfer(
     paths = destination_base
     if len(origin["paths"]) > 0:
         paths = paths.joinpath(origin["paths"])
-        paths.mkdir(mode=777, exist_ok=True, parents=True)
+        paths.mkdir(exist_ok=True, parents=True)
 
     basename = f"{origin['basename']}{extension}"
 
