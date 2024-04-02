@@ -116,16 +116,18 @@ def transfer(
 
     path = src_base / Path(origin["paths"])
 
-    if isRemain(queue, entry["data"], origin, path):
-        return
-
-    path.rmdir()
-
-    for i in range(1, origin["paths"].count(os.sep) + 1):
-        if isRemain(queue, entry["data"], origin, path.parents[i]):
+    if path.is_dir():
+        if isRemain(queue, entry["data"], origin, path):
             return
 
-        path.parents[i].rmdir()
+        path.rmdir()
+
+    for i in range(1, origin["paths"].count(os.sep) + 1):
+        if path.parents[i].is_dir():
+            if isRemain(queue, entry["data"], origin, path.parents[i]):
+                return
+
+            path.parents[i].rmdir()
 
 
 def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> bool:
