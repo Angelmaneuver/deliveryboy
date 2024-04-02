@@ -55,7 +55,6 @@ def start(
                     queue["request"],
                     queue["response"],
                     entry,
-                    max_queue_size,
                 ),
             ),
         },
