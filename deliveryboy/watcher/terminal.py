@@ -56,22 +56,21 @@ def move(
                 transfer(Path(response), destination, request_queue, entry)
 
                 if len(entry["data"]) == 0 and len(request_queue["data"]) == 0:
-                    remain = list(
-                        filter(
-                            lambda value: Path.is_file(value)
-                            and not str(value).startswith("."),
-                            list(request.iterdir()),
-                        ),
-                    )
+                    remain = []
+                    for _, _, files in request.walk():
+                        remain.extend(files)
 
                     if len(remain) > 0:
                         with request_queue["lock"]:
                             for file in remain:
-                                src = str(file)
+                                src = Path(file)
 
-                                request_queue["data"][src] = (
+                                if src.stem.startswith("."):
+                                    continue
+
+                                request_queue["data"][file] = (
                                     get_now(),
-                                    get_entry(request_base, src),
+                                    get_entry(request_base, file),
                                 )
 
                 break
