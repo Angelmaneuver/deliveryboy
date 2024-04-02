@@ -9,7 +9,7 @@ from deliveryboy.types import Data, RequestQueue
 
 
 def regist(path: str, event_handler: any, wait: int = None):
-    observer = Observer()
+    observer = Observer(timeout=0)
 
     observer.schedule(event_handler, path, recursive=True)
 
