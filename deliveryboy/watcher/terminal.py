@@ -53,7 +53,7 @@ def move(
                 with response_queue["lock"]:
                     del response_queue["data"][key]
 
-                transfer(Path(response), destination, request_queue, entry)
+                transfer(Path(response), request, destination, request_queue, entry)
 
                 if len(entry["data"]) == 0 and len(request_queue["data"]) == 0:
                     remain = []
@@ -80,7 +80,8 @@ def move(
 
 def transfer(
     src: Path,
-    base: Path,
+    src_base: Path,
+    destination_base: Path,
     queue: RequestQueue,
     entry: Data,
 ):
@@ -96,9 +97,9 @@ def transfer(
 
     origin = entry_data["origin"]
 
-    paths = base
+    paths = destination_base
     if len(origin["paths"]) > 0:
-        paths = base.joinpath(origin["paths"])
+        paths = paths.joinpath(origin["paths"])
         paths.mkdir(exist_ok=True, parents=True)
 
     basename = f"{origin['basename']}{extension}"
@@ -113,7 +114,7 @@ def transfer(
     if len(origin["paths"]) == 0:
         return
 
-    path = base / Path(origin["paths"])
+    path = src_base / Path(origin["paths"])
 
     if isRemain(queue, entry["data"], origin, path):
         return
