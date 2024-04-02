@@ -125,16 +125,15 @@ def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> b
     if exisiting is not None:
         return True
 
-    with queue["lock"]:
-        queueing = next(
-            filter(
-                lambda queue: not queue["origin"]["paths"].startswith(origin["paths"]),
-                queue["data"],
-            ),
-            None,
-        )
+    queueing = next(
+        filter(
+            lambda queue: not queue["origin"]["paths"].startswith(origin["paths"]),
+            queue["data"],
+        ),
+        None,
+    )
 
-        if queueing is not None:
-            return True
+    if queueing is not None:
+        return True
 
     return False
