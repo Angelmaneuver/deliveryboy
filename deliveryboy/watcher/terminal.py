@@ -116,13 +116,13 @@ def transfer(
 
     path = base / Path(origin["paths"])
 
-    if isRemain(queue, entry, origin, path):
+    if isRemain(queue, entry["data"], origin, path):
         return
 
     path.rmdir()
 
     for i in range(1, origin["paths"].count(os.sep) + 1):
-        if isRemain(queue, entry, origin, path.parents[i]):
+        if isRemain(queue, entry["data"], origin, path.parents[i]):
             return
 
         path.parents[i].rmdir()
@@ -131,7 +131,7 @@ def transfer(
 def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> bool:
     entring = next(
         filter(
-            lambda entry: not entry["origin"]["paths"].startswith(origin["paths"]),
+            lambda value: not value["origin"]["paths"].startswith(origin["paths"]),
             entry,
         ),
         None,
