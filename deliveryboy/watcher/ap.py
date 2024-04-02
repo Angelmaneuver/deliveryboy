@@ -1,13 +1,14 @@
-import pathlib
 import shutil
 import time
+from datetime import datetime
+from pathlib import Path
 
 from watchdog.observers.polling import PollingObserver as Observer
 
-from deliveryboy.types import Data
+from deliveryboy.types import Data, RequestQueue
 
 
-def regist(path: str, event_handler: any, wait: int = None):
+def regist(path: str, event_handler: any, wait: int = 1):
     observer = Observer()
 
     observer.schedule(event_handler, path, recursive=True)
@@ -27,12 +28,13 @@ def regist(path: str, event_handler: any, wait: int = None):
 
 def move(
     dest: str,
-    queue: Data,
+    queue: RequestQueue,
     entry: Data,
     max_queue_size: int,
-    wait=1,
+    wait: int = 1,
+    threshold: int = 5,
 ):
-    path = pathlib.Path(dest)
+    path = Path(dest)
 
     while True:
         if len(queue["data"]) == 0:
@@ -45,10 +47,18 @@ def move(
 
         with queue["lock"]:
             with entry["lock"]:
-                request = queue["data"].pop()
+                for key, value in queue["data"].items():
+                    lasttime, request = value
 
-                entry["data"].append(request)
+                    if (datetime.now() - lasttime).total_seconds() > threshold:
+                        del queue["data"][key]
 
-                shutil.move(request["origin"]["full"], path.joinpath(request["id"]))
+                        entry["data"].append(request)
+
+                        shutil.move(
+                            request["origin"]["full"], path.joinpath(request["id"])
+                        )
+
+                        break
 
         time.sleep(wait)

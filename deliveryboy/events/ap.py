@@ -4,13 +4,13 @@ from uuid import uuid4 as uuid
 
 from watchdog.events import FileSystemEvent
 
-from deliveryboy.types import Data, Entry, Origin
+from deliveryboy.types import Entry, Origin, RequestQueue
 
 from .abc import AbstractEventHandler
 
 
 class APEventHandler(AbstractEventHandler):
-    def __init__(self, base: str, queue: Data) -> None:
+    def __init__(self, base: str, queue: RequestQueue) -> None:
         super().__init__(base)
 
         self._queue = queue["data"]
@@ -20,8 +20,26 @@ class APEventHandler(AbstractEventHandler):
         if event.is_directory:
             return
 
+        with self._lock:
+            self._queue[event.src_path] = (self.now, self.get_entry(event.src_path))
+
+    def on_modified(self, event: FileSystemEvent) -> None:
+        if event.is_directory:
+            return
+
+        with self._lock:
+            entry = None
+
+            if event.src_path in self._queue:
+                _, entry = self._queue[event.src_path]
+            else:
+                entry = self.get_entry(event.src_path)
+
+            self._queue[event.src_path] = (self.now, entry)
+
+    def get_entry(self, path: str) -> Entry:
         id = str(uuid())
-        src = Path(event.src_path)
+        src = Path(path)
         dirname = str(src.parent)
         basename = src.stem
         extension = "".join(src.suffixes)
@@ -32,15 +50,12 @@ class APEventHandler(AbstractEventHandler):
 
         paths = dirname.replace(replace, "", 1)
 
-        with self._lock:
-            self._queue.append(
-                Entry(
-                    id=id,
-                    origin=Origin(
-                        full=str(src),
-                        paths=paths,
-                        basename=basename,
-                        extension=extension,
-                    ),
-                )
-            )
+        return Entry(
+            id=id,
+            origin=Origin(
+                full=str(src),
+                paths=paths,
+                basename=basename,
+                extension=extension,
+            ),
+        )
