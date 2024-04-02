@@ -45,24 +45,22 @@ def move(
             time.sleep(wait)
             continue
 
-        with queue["lock"]:
-            with entry["lock"]:
-                for key, value in queue["data"].items():
-                    lasttime, request = value
+        for key, value in queue["data"].items():
+            lasttime, request = value
 
-                    if (datetime.now() - lasttime).total_seconds() > threshold:
-                        del queue["data"][key]
+            if (datetime.now() - lasttime).total_seconds() > threshold:
+                with queue["lock"]:
+                    del queue["data"][key]
 
-                        try:
-                            shutil.move(
-                                request["origin"]["full"], path.joinpath(request["id"])
-                            )
+                try:
+                    shutil.move(request["origin"]["full"], path.joinpath(request["id"]))
 
-                            entry["data"].append(request)
+                    with entry["lock"]:
+                        entry["data"].append(request)
 
-                        except FileNotFoundError:
-                            pass
+                except FileNotFoundError:
+                    pass
 
-                        break
+                break
 
         time.sleep(wait)

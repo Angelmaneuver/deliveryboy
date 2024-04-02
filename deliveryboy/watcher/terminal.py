@@ -42,17 +42,16 @@ def move(
             time.sleep(wait)
             continue
 
-        with response_queue["lock"]:
-            with entry["lock"]:
-                for key, value in response_queue["data"].items():
-                    lasttime, response = value
+        for key, value in response_queue["data"].items():
+            lasttime, response = value
 
-                    if (datetime.now() - lasttime).total_seconds() > threshold:
-                        del response_queue["data"][key]
+            if (datetime.now() - lasttime).total_seconds() > threshold:
+                with response_queue["lock"]:
+                    del response_queue["data"][key]
 
-                        transfer(Path(response), base, request_queue, entry)
+                transfer(Path(response), base, request_queue, entry)
 
-                        break
+                break
 
         time.sleep(wait)
 
@@ -84,7 +83,8 @@ def transfer(
 
     dest = str(paths.joinpath(basename))
 
-    entry["data"].pop(index)
+    with entry["lock"]:
+        entry["data"].pop(index)
 
     shutil.move(str(src), dest)
 
