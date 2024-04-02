@@ -31,7 +31,7 @@ def move(
     queue: RequestQueue,
     entry: Data,
     max_queue_size: int,
-    wait: int = None,
+    wait: int = 1,
     threshold: int = 1,
 ):
     path = Path(dest)

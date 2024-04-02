@@ -32,7 +32,7 @@ def move(
     request_queue: RequestQueue,
     response_queue: ResponseQueue,
     entry: Data,
-    wait: int = None,
+    wait: int = 1,
     threshold: int = 1,
 ):
     base = Path(dest)
