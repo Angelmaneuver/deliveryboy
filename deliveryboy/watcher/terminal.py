@@ -3,13 +3,15 @@ import shutil
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import TypedDict
 
 from watchdog.observers import Observer
 
+from deliveryboy.common import get_entry, get_now
 from deliveryboy.types import Data, Entry, Origin, RequestQueue, ResponseQueue
 
 
-def regist(path: str, event_handler: any, wait: int = None):
+def regist(path: str, event_handler: any, wait: int = 1):
     observer = Observer()
 
     observer.schedule(event_handler, path, recursive=True)
@@ -28,14 +30,16 @@ def regist(path: str, event_handler: any, wait: int = None):
 
 
 def move(
-    dest: str,
+    request_base: str,
     request_queue: RequestQueue,
+    response_base: str,
     response_queue: ResponseQueue,
     entry: Data,
     wait: int = 1,
     threshold: int = 1,
 ):
-    base = Path(dest)
+    request = Path(request_base)
+    destination = Path(response_base)
 
     while True:
         if len(response_queue["data"]) == 0:
@@ -49,7 +53,26 @@ def move(
                 with response_queue["lock"]:
                     del response_queue["data"][key]
 
-                transfer(Path(response), base, request_queue, entry)
+                transfer(Path(response), destination, request_queue, entry)
+
+                if len(entry["data"]) == 0 and len(request_queue["data"]) == 0:
+                    remain = list(
+                        filter(
+                            lambda value: Path.is_file(value)
+                            and not str(value).startswith("."),
+                            list(request.iterdir()),
+                        ),
+                    )
+
+                    if len(remain) > 0:
+                        with request_queue["lock"]:
+                            for file in remain:
+                                src = str(file)
+
+                                request_queue["data"][src] = (
+                                    get_now(),
+                                    get_entry(request_base, src),
+                                )
 
                 break
 

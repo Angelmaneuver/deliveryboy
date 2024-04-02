@@ -1,10 +1,6 @@
-import os
-from pathlib import Path
-from uuid import uuid4 as uuid
-
 from watchdog.events import FileSystemEvent
 
-from deliveryboy.types import Entry, Origin, RequestQueue
+from deliveryboy.types import RequestQueue
 
 from .abc import AbstractEventHandler
 
@@ -21,7 +17,10 @@ class APEventHandler(AbstractEventHandler):
             return
 
         with self._lock:
-            self._queue[event.src_path] = (self.now, self.get_entry(event.src_path))
+            self._queue[event.src_path] = (
+                self.now,
+                self.get_entry(self._base, event.src_path),
+            )
 
     def on_modified(self, event: FileSystemEvent) -> None:
         if event.is_directory:
@@ -33,29 +32,6 @@ class APEventHandler(AbstractEventHandler):
             if event.src_path in self._queue:
                 _, entry = self._queue[event.src_path]
             else:
-                entry = self.get_entry(event.src_path)
+                entry = self.get_entry(self._base, event.src_path)
 
             self._queue[event.src_path] = (self.now, entry)
-
-    def get_entry(self, path: str) -> Entry:
-        id = str(uuid())
-        src = Path(path)
-        dirname = str(src.parent)
-        basename = src.stem
-        extension = "".join(src.suffixes)
-
-        replace = self._base
-        if dirname.startswith(f"{replace}{os.sep}"):
-            replace += os.sep
-
-        paths = dirname.replace(replace, "", 1)
-
-        return Entry(
-            id=id,
-            origin=Origin(
-                full=str(src),
-                paths=paths,
-                basename=basename,
-                extension=extension,
-            ),
-        )

@@ -8,8 +8,8 @@ from watchdog.observers.polling import PollingObserver as Observer
 from deliveryboy.types import Data, RequestQueue
 
 
-def regist(path: str, event_handler: any, wait: int = None):
-    observer = Observer(timeout=0)
+def regist(path: str, event_handler: any, wait: int = 1):
+    observer = Observer()
 
     observer.schedule(event_handler, path, recursive=True)
 

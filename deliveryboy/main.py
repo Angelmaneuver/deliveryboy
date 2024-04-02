@@ -51,8 +51,9 @@ def start(
             "move": threading.Thread(
                 target=watcher.terminal.move,
                 args=(
-                    response,
+                    request,
                     queue["request"],
+                    response,
                     queue["response"],
                     entry,
                 ),

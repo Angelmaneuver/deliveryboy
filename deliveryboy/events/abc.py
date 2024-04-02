@@ -1,6 +1,6 @@
-from datetime import datetime
-
 from watchdog.events import FileSystemEventHandler
+
+from deliveryboy.common import get_entry, get_now
 
 
 class AbstractEventHandler(FileSystemEventHandler):
@@ -11,4 +11,7 @@ class AbstractEventHandler(FileSystemEventHandler):
 
     @property
     def now(self):
-        return datetime.now()
+        return get_now()
+
+    def get_entry(self, base, path):
+        return get_entry(base, path)
