@@ -53,11 +53,15 @@ def move(
                     if (datetime.now() - lasttime).total_seconds() > threshold:
                         del queue["data"][key]
 
-                        entry["data"].append(request)
+                        try:
+                            shutil.move(
+                                request["origin"]["full"], path.joinpath(request["id"])
+                            )
 
-                        shutil.move(
-                            request["origin"]["full"], path.joinpath(request["id"])
-                        )
+                            entry["data"].append(request)
+
+                        except FileNotFoundError:
+                            pass
 
                         break
 
