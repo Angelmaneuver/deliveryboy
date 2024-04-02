@@ -8,7 +8,7 @@ from watchdog.observers.polling import PollingObserver as Observer
 from deliveryboy.types import Data, RequestQueue
 
 
-def regist(path: str, event_handler: any, wait: int = 1):
+def regist(path: str, event_handler: any, wait: int = None):
     observer = Observer()
 
     observer.schedule(event_handler, path, recursive=True)
@@ -31,8 +31,8 @@ def move(
     queue: RequestQueue,
     entry: Data,
     max_queue_size: int,
-    wait: int = 1,
-    threshold: int = 5,
+    wait: int = None,
+    threshold: int = 1,
 ):
     path = Path(dest)
 

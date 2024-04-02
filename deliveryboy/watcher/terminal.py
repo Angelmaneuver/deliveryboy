@@ -9,7 +9,7 @@ from watchdog.observers import Observer
 from deliveryboy.types import Data, Entry, Origin, RequestQueue, ResponseQueue
 
 
-def regist(path: str, event_handler: any, wait: int = 1):
+def regist(path: str, event_handler: any, wait: int = None):
     observer = Observer()
 
     observer.schedule(event_handler, path, recursive=True)
@@ -32,8 +32,8 @@ def move(
     request_queue: RequestQueue,
     response_queue: ResponseQueue,
     entry: Data,
-    wait: int = 1,
-    threshold: int = 5,
+    wait: int = None,
+    threshold: int = 1,
 ):
     base = Path(dest)
 
