@@ -126,7 +126,7 @@ def transfer(
 
         path.rmdir()
 
-    for i in range(0, origin["paths"].count(os.sep) + 1):
+    for i in range(0, origin["paths"].count(os.sep)):
         if path.parents[i].is_dir():
             if isRemain(queue, entry["data"], origin, path.parents[i]):
                 return
