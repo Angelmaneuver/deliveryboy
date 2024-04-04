@@ -1,5 +1,6 @@
 from watchdog.events import FileSystemEvent
 
+from deliveryboy.common import is_ignore
 from deliveryboy.types import RequestQueue
 
 from .abc import AbstractEventHandler
@@ -16,6 +17,9 @@ class APEventHandler(AbstractEventHandler):
         if event.is_directory:
             return
 
+        if is_ignore(event.src_path):
+            return
+
         with self._lock:
             self._queue[event.src_path] = (
                 self.now,
@@ -24,6 +28,9 @@ class APEventHandler(AbstractEventHandler):
 
     def on_modified(self, event: FileSystemEvent) -> None:
         if event.is_directory:
+            return
+
+        if is_ignore(event.src_path):
             return
 
         with self._lock:

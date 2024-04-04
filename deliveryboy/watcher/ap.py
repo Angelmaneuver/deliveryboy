@@ -5,7 +5,7 @@ from pathlib import Path
 
 from watchdog.observers.polling import PollingObserver as Observer
 
-from deliveryboy.common import get_entry, get_now
+from deliveryboy.common import get_entry, get_now, is_ignore
 from deliveryboy.types import Data, RequestQueue
 
 
@@ -85,9 +85,7 @@ def remain(request_base: str, queue: RequestQueue, entry: Data, wait: int = 60):
 
         with queue["lock"]:
             for file in remain:
-                src = Path(file)
-
-                if src.stem.startswith("."):
+                if is_ignore(file):
                     continue
 
                 queue["data"][file] = (

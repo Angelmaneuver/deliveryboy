@@ -3,11 +3,10 @@ import shutil
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import TypedDict
 
 from watchdog.observers import Observer
 
-from deliveryboy.common import get_entry, get_now
+from deliveryboy.common import is_ignore
 from deliveryboy.types import Data, Entry, Origin, RequestQueue, ResponseQueue
 
 
@@ -114,7 +113,7 @@ def transfer(
 
 def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> bool:
     isExisiting = next(
-        filter(lambda value: not str(value).startswith("."), list(path.iterdir())),
+        filter(lambda value: not is_ignore(str(value)), list(path.iterdir())),
         None,
     )
 
