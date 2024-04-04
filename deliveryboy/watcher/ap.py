@@ -5,6 +5,7 @@ from pathlib import Path
 
 from watchdog.observers.polling import PollingObserver as Observer
 
+from deliveryboy.common import get_entry, get_now
 from deliveryboy.types import Data, RequestQueue
 
 
@@ -64,3 +65,32 @@ def move(
                 break
 
         time.sleep(wait)
+
+
+def remain(request_base: str, queue: RequestQueue, entry: Data, wait: int = 60):
+    request = Path(request_base)
+
+    while True:
+        if len(queue["data"]) > 0 or len(entry["data"]) > 0:
+            time.sleep(wait)
+            continue
+
+        remain = []
+        for _, _, files in request.walk():
+            remain.extend(files)
+
+        if len(remain) == 0:
+            time.sleep(wait)
+            continue
+
+        with queue["lock"]:
+            for file in remain:
+                src = Path(file)
+
+                if src.stem.startswith("."):
+                    continue
+
+                queue["data"][file] = (
+                    get_now(),
+                    get_entry(request_base, file),
+                )

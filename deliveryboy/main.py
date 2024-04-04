@@ -39,6 +39,14 @@ def start(
                     max_queue_size,
                 ),
             ),
+            "remain": threading.Thread(
+                target=watcher.ap.remain,
+                args=(
+                    request,
+                    queue["request"],
+                    entry,
+                ),
+            ),
         },
         "terminal": {
             "watch": threading.Thread(
@@ -63,11 +71,13 @@ def start(
 
     threads["ap"]["watch"].start()
     threads["ap"]["move"].start()
+    threads["ap"]["remain"].start()
     threads["terminal"]["watch"].start()
     threads["terminal"]["move"].start()
 
     threads["ap"]["watch"].join()
     threads["ap"]["move"].join()
+    threads["ap"]["remain"].join()
     threads["terminal"]["watch"].join()
     threads["terminal"]["move"].join()
 

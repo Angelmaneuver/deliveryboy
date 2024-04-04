@@ -55,28 +55,6 @@ def move(
 
                 transfer(Path(response), request, destination, request_queue, entry)
 
-                if len(request_queue["data"]) > 0:
-                    break
-
-                remain = []
-                for _, _, files in request.walk():
-                    remain.extend(files)
-
-                if len(remain) == 0:
-                    break
-
-                with request_queue["lock"]:
-                    for file in remain:
-                        src = Path(file)
-
-                        if src.stem.startswith("."):
-                            continue
-
-                        request_queue["data"][file] = (
-                            get_now(),
-                            get_entry(request_base, file),
-                        )
-
                 break
 
         time.sleep(wait)
