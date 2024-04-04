@@ -65,9 +65,6 @@ def move(
                 if len(remain) == 0:
                     break
 
-                if len(entry["data"]) >= len(remain):
-                    break
-
                 with request_queue["lock"]:
                     for file in remain:
                         src = Path(file)
