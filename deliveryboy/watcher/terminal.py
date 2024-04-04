@@ -156,7 +156,7 @@ def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> b
 
     queueing = next(
         filter(
-            lambda queue: not queue["origin"]["paths"].startswith(origin["paths"]),
+            lambda value: not value[1]["origin"]["paths"].startswith(origin["paths"]),
             queue["data"],
         ),
         None,
