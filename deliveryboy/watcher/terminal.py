@@ -135,34 +135,12 @@ def transfer(
 
 
 def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> bool:
-    entring = next(
-        filter(
-            lambda value: not value["origin"]["paths"].startswith(origin["paths"]),
-            entry,
-        ),
-        None,
-    )
-
-    if entring is not None:
-        return True
-
-    exisiting = next(
+    isExisiting = next(
         filter(lambda value: not str(value).startswith("."), list(path.iterdir())),
         None,
     )
 
-    if exisiting is not None:
-        return True
-
-    queueing = next(
-        filter(
-            lambda value: not value[1]["origin"]["paths"].startswith(origin["paths"]),
-            queue["data"],
-        ),
-        None,
-    )
-
-    if queueing is not None:
+    if isExisiting is not None:
         return True
 
     return False
