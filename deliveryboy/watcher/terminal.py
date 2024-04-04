@@ -55,23 +55,30 @@ def move(
 
                 transfer(Path(response), request, destination, request_queue, entry)
 
-                if len(entry["data"]) == 0 and len(request_queue["data"]) == 0:
-                    remain = []
-                    for _, _, files in request.walk():
-                        remain.extend(files)
+                if len(request_queue["data"]) > 0:
+                    break
 
-                    if len(remain) > 0:
-                        with request_queue["lock"]:
-                            for file in remain:
-                                src = Path(file)
+                remain = []
+                for _, _, files in request.walk():
+                    remain.extend(files)
 
-                                if src.stem.startswith("."):
-                                    continue
+                if len(remain) == 0:
+                    break
 
-                                request_queue["data"][file] = (
-                                    get_now(),
-                                    get_entry(request_base, file),
-                                )
+                if len(entry["data"]) >= len(remain):
+                    break
+
+                with request_queue["lock"]:
+                    for file in remain:
+                        src = Path(file)
+
+                        if src.stem.startswith("."):
+                            continue
+
+                        request_queue["data"][file] = (
+                            get_now(),
+                            get_entry(request_base, file),
+                        )
 
                 break
 
