@@ -120,10 +120,10 @@ def remain(request: Path, queue: RequestQueue, entry: Data):
     remain = []
     for dirpath, _, files in request.walk():
         for file in files:
-            path = dirpath / file
+            path = str(dirpath / file)
 
             if not is_ignore(path):
-                remain.append(str(path))
+                remain.append(path)
 
     if len(remain) == 0:
         return
