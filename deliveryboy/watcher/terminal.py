@@ -6,7 +6,7 @@ from pathlib import Path
 
 from watchdog.observers import Observer
 
-from deliveryboy.common import is_ignore
+from deliveryboy.common import get_entry, get_now, is_ignore
 from deliveryboy.types import Data, Entry, Origin, RequestQueue, ResponseQueue
 
 
@@ -53,6 +53,8 @@ def move(
                     del response_queue["data"][key]
 
                 transfer(Path(response), request, destination, request_queue, entry)
+
+                remain(request, request_queue, entry)
 
                 break
 
@@ -109,6 +111,29 @@ def transfer(
                 return
 
             path.parents[i].rmdir()
+
+
+def remain(request: Path, queue: RequestQueue, entry: Data):
+    if len(queue["data"]) > 0 or len(entry["data"]) > 0:
+        return
+
+    remain = []
+    for dirpath, _, files in request.walk():
+        for file in files:
+            path = dirpath / file
+
+            if not is_ignore(path):
+                remain.append(str(path))
+
+    if len(remain) == 0:
+        return
+
+    with queue["lock"]:
+        for file in remain:
+            queue["data"][file] = (
+                get_now(),
+                get_entry(str(request), file),
+            )
 
 
 def isRemain(queue: RequestQueue, entry: Entry, origin: Origin, path: Path) -> bool:
