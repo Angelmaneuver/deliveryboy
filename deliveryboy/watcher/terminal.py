@@ -85,6 +85,9 @@ def transfer(
         paths = paths.joinpath(origin["paths"])
         paths.mkdir(exist_ok=True, parents=True)
 
+    if len(extension) == 0:
+        extension = origin["extension"]
+
     basename = f"{origin['basename']}{extension}"
 
     dest = str(paths.joinpath(basename))
